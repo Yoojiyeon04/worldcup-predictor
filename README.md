@@ -18,6 +18,19 @@ Cursor MCP (Supabase / Vercel) → AI가 DB·배포 상태 확인
 
 > `worldcup-predictor/`는 별도 React 프로토타입이며 Vercel 배포 대상이 아닙니다.
 
+## QC 이슈 추적 (Next.js)
+
+Supabase `qc_issues` 테이블을 사용하는 별도 웹앱입니다.
+
+```powershell
+cd qc-issues-next
+copy .env.example .env.local   # NEXT_PUBLIC_SUPABASE_* 입력
+npm install
+npm run dev
+```
+
+자세한 내용은 `qc-issues-next/README.md`를 참고하세요. Vercel 배포는 랜딩과 **별도 프로젝트**로 설정합니다.
+
 ## 로컬 실행
 
 ```powershell
