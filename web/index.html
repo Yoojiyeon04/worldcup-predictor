@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>월드컵 승부 예측기</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      color: #f8fafc;
+      padding: 2rem;
+    }
+    .card {
+      max-width: 480px;
+      text-align: center;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 2.5rem;
+    }
+    h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    p { color: #94a3b8; line-height: 1.6; margin-bottom: 1.5rem; }
+    a.btn {
+      display: inline-block;
+      background: #4f46e5;
+      color: white;
+      text-decoration: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    a.btn:hover { background: #4338ca; }
+    .meta { margin-top: 1.5rem; font-size: 0.75rem; color: #64748b; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>⚽ 월드컵 승부 예측기</h1>
+    <p>대한민국 vs 멕시코 — Poisson 분포 기반 교육용 시뮬레이터<br>데이터는 Supabase에 저장됩니다.</p>
+    <a class="btn" href="https://share.streamlit.io" id="app-link">Streamlit 앱 열기</a>
+    <p class="meta">Vercel: 랜딩 · Streamlit Cloud: 앱 · Supabase: DB</p>
+  </div>
+  <script>
+    // Streamlit Cloud 배포 후 URL을 여기에 설정하세요
+    const STREAMLIT_APP_URL = "";
+    if (STREAMLIT_APP_URL) document.getElementById("app-link").href = STREAMLIT_APP_URL;
+  </script>
+</body>
+</html>

@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from ai_commentary import generate_commentary
+from supabase_db import check_connection, is_configured, load_reflections, save_prediction_snapshot, save_reflection
 from data import (
     HISTORICAL_MATCHES,
     INITIAL,
@@ -66,10 +67,15 @@ def _init_state() -> None:
     if "vars" not in st.session_state:
         st.session_state.vars = INITIAL
         _sync_sliders(INITIAL)
+    if "session_id" not in st.session_state:
+        import uuid
+        st.session_state.session_id = str(uuid.uuid4())
     if "ai_commentary" not in st.session_state:
         st.session_state.ai_commentary = ""
     if "reflection" not in st.session_state:
         st.session_state.reflection = {q["id"]: "" for q in REFLECTION_QUESTIONS}
+        if is_configured():
+            st.session_state.reflection.update(load_reflections(st.session_state.session_id))
 
 def _build_variables() -> ModelVariables:
     """슬라이더 session_state 값으로 ModelVariables 생성."""
@@ -363,7 +369,10 @@ def _render_reflection() -> None:
 
     if st.button("작성 내용 저장"):
         st.session_state.reflection[q["id"]] = answer
-        st.success("저장되었습니다!")
+        if is_configured() and save_reflection(st.session_state.session_id, q["id"], answer):
+            st.success("Supabase에 저장되었습니다!")
+        else:
+            st.success("로컬에 저장되었습니다!")
 
     with st.expander("💡 통계적 리터러시 해설"):
         st.write(q["guide"])
@@ -383,6 +392,19 @@ def _render_limitations() -> None:
 
 def main() -> None:
     _init_state()
+
+    with st.sidebar:
+        st.markdown("### 🔌 연결 상태")
+        db = check_connection()
+        if db["ok"]:
+            st.success(db["message"])
+        elif is_configured():
+            st.warning(db["message"])
+        else:
+            st.info("Supabase 미연결 (로컬 모드)")
+        st.caption(f"Session: `{st.session_state.session_id[:8]}…`")
+        st.caption("🔒 RLS: 본인 세션 데이터만 접근 가능")
+
     _render_header()
     _render_presets()
 
@@ -414,6 +436,21 @@ def main() -> None:
             _render_history()
         with tab5:
             _render_ai(variables, result)
+
+        if is_configured():
+            if st.button("💾 Supabase에 예측 스냅샷 저장", key="save_snapshot"):
+                ok = save_prediction_snapshot(
+                    st.session_state.session_id,
+                    asdict(variables),
+                    {
+                        "korea_win_pct": result.korea_win_pct,
+                        "draw_pct": result.draw_pct,
+                        "mexico_win_pct": result.mexico_win_pct,
+                        "korea_expected_goals": result.korea_expected_goals,
+                        "mexico_expected_goals": result.mexico_expected_goals,
+                    },
+                )
+                st.success("Supabase 저장 완료") if ok else st.error("저장 실패 — schema.sql 실행 여부 확인")
 
     st.markdown("---")
     _render_reflection()
