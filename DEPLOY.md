@@ -77,7 +77,24 @@ SUPABASE_ANON_KEY = "..."
 
 5. Deploy → https://worldcup-predictor-rosy.vercel.app
 
-`main` push 시 GitHub 연동이 되어 있으면 자동 재배포됩니다.
+`main` push 시 자동 재배포 (아래 **A** 또는 **B** 중 하나):
+
+### A. GitHub Actions (권장 — Vercel GitHub 연결 없이 동작)
+
+1. [vercel.com/account/tokens](https://vercel.com/account/tokens) → 토큰 생성
+2. GitHub 저장소 → **Settings → Secrets → Actions** → `VERCEL_TOKEN` 추가
+3. `.github/workflows/vercel-deploy.yml`이 `main` push마다 배포
+
+### B. Vercel 대시보드 Git 연동
+
+1. [vercel.com/account/authentication](https://vercel.com/account/authentication) → GitHub Login Connection
+2. 프로젝트 Settings → Git → `Yoojiyeon04/worldcup-predictor` 연결
+
+### Streamlit URL 반영 (배포 후)
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/set-streamlit-url.ps1 "https://YOUR-APP.streamlit.app"
+```
 
 ---
 
