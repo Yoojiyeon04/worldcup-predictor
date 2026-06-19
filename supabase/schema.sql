@@ -23,7 +23,7 @@ create index if not exists idx_prediction_session on prediction_snapshots (sessi
 alter table reflection_answers enable row level security;
 alter table prediction_snapshots enable row level security;
 
--- 세션 컨텍스트 설정 (앱에서 RPC 호출 후 read/write)
+-- set_session_context: RPC 내부 set_config용 (외부 anon 호출 불필요)
 create or replace function public.set_session_context(sid text)
 returns void
 language plpgsql
@@ -47,8 +47,9 @@ as $$
   select true;
 $$;
 
-grant execute on function public.set_session_context(text) to anon, authenticated;
 grant execute on function public.health_check() to anon, authenticated;
+revoke execute on function public.set_session_context(text) from public;
+revoke execute on function public.set_session_context(text) from anon, authenticated;
 
 -- RPC: REST 요청마다 세션이 끊기므로 read/write는 단일 트랜잭션 함수로 처리
 create or replace function public.upsert_reflection(p_sid text, p_question_id text, p_answer text)

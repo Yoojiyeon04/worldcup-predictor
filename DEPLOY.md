@@ -11,7 +11,8 @@
 ### RLS 보안
 
 - `public` 테이블은 RLS 활성 + `app.session_id` 기반 정책
-- read/write RPC는 `SECURITY INVOKER`로 RLS를 우회하지 않음
+- read/write RPC(`SECURITY INVOKER`)가 트랜잭션 내에서 `set_config('app.session_id', ...)` 후 RLS 적용
+- `set_session_context`는 외부 anon 호출 권한 없음 (RPC 내부 전용)
 - 세션 UUID를 아는 경우에만 해당 세션 데이터 접근 가능 (교육용 anon 앱)
 
 ---
@@ -58,7 +59,7 @@ SUPABASE_ANON_KEY = "..."
 ## 4. Vercel (랜딩 페이지)
 
 1. [vercel.com/new](https://vercel.com/new) → GitHub `worldcup-predictor` Import
-2. GitHub Login Connection이 없으면 [Account Settings](https://vercel.com/account)에서 먼저 연결
+2. **GitHub Login Connection** (필수): [vercel.com/account/authentication](https://vercel.com/account/authentication) → GitHub 연결 후 Import
 3. Import 설정:
 
 | 항목 | 값 |
