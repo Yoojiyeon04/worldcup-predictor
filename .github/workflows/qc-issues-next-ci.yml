@@ -1,0 +1,39 @@
+name: QC Issues Next CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "qc-issues-next/**"
+      - ".github/workflows/qc-issues-next-ci.yml"
+  pull_request:
+    paths:
+      - "qc-issues-next/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: qc-issues-next
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: qc-issues-next/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+        env:
+          # CI placeholder — 실제 키는 Vercel/로컬 .env.local에만 둡니다
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key

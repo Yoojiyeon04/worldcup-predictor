@@ -2,7 +2,8 @@
 
 ## 1. Supabase (데이터 저장)
 
-1. [supabase.com/dashboard](https://supabase.com/dashboard) → **New project**
+1. [supabase.com/dashboard](https://supabase.com/dashboard) — 프로젝트 `yhejcjnvkaormbfkrynb`
+   - URL: `https://yhejcjnvkaormbfkrynb.supabase.co`
 2. **SQL Editor** → `supabase/schema.sql` 전체 붙여넣기 → **Run**
 3. **Project Settings → API**에서 복사:
    - Project URL → `SUPABASE_URL`
@@ -48,7 +49,7 @@ git push origin main
 ```
 OPENAI_API_KEY = "..."
 OPENAI_MODEL = "gpt-5-mini"
-SUPABASE_URL = "https://xxx.supabase.co"
+SUPABASE_URL = "https://yhejcjnvkaormbfkrynb.supabase.co"
 SUPABASE_ANON_KEY = "..."
 ```
 

@@ -38,7 +38,10 @@ export default function RootLayout({
               <Link href="/new" className="text-zinc-600 hover:text-teal-700">
                 등록
               </Link>
-              <Link href="/admin" className="text-zinc-600 hover:text-teal-700">
+              <Link
+                href="/#admin-check-panel-title"
+                className="text-zinc-600 hover:text-teal-700"
+              >
                 관리
               </Link>
             </nav>

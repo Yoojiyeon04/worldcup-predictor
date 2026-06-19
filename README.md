@@ -11,7 +11,7 @@ GitHub (Yoojiyeon04/worldcup-predictor)
     ↓ 자동 배포
 ├── Vercel        → web/ 랜딩 (빌드 → dist/)
 ├── Streamlit Cloud → worldcup-streamlit/app.py (메인 앱)
-└── Supabase      → 성찰 답변 · 예측 스냅샷 저장
+└── Supabase      → https://yhejcjnvkaormbfkrynb.supabase.co (성찰·예측·qc_issues)
     ↑
 Cursor MCP (Supabase / Vercel) → AI가 DB·배포 상태 확인
 ```
@@ -24,12 +24,23 @@ Supabase `qc_issues` 테이블을 사용하는 별도 웹앱입니다.
 
 ```powershell
 cd qc-issues-next
-copy .env.example .env.local   # NEXT_PUBLIC_SUPABASE_* 입력
+copy .env.example .env.local   # NEXT_PUBLIC_SUPABASE_* + 서버 전용 2개 입력
 npm install
 npm run dev
 ```
 
-자세한 내용은 `qc-issues-next/README.md`를 참고하세요. Vercel 배포는 랜딩과 **별도 프로젝트**로 설정합니다.
+http://localhost:3001
+
+| 보안 | 내용 |
+|------|------|
+| 클라이언트 | `NEXT_PUBLIC_SUPABASE_ANON_KEY`만 (Server Action 경유) |
+| 서버 API | `SUPABASE_SERVICE_ROLE_KEY` + `ADMIN_TOKEN` — `/api/admin/qc-issues/summary` |
+| Git | `.env.local` 커밋 금지 |
+| DB RLS | 교육용 `edu_all_access` (anon 전체 CRUD) — **운영 전 정책 분리 필요** |
+
+Vercel 배포는 랜딩과 **별도 프로젝트** (`Root Directory: qc-issues-next`). 자세한 내용은 `qc-issues-next/README.md`를 참고하세요.
+
+> `qc-issue-tracker/`는 별도 실습용 앱(포트 3000)이며, 이 Next.js 앱과 DB·보안 모델이 다릅니다.
 
 ## 로컬 실행
 
@@ -40,11 +51,15 @@ copy .env.example .env   # API 키 입력
 py -m streamlit run app.py
 ```
 
+사이드바에서 **QC 이슈 추적** 페이지로 QC 앱(`qc_issues` 테이블)을 사용할 수 있습니다.
+
 ## Supabase 설정
 
-1. [supabase.com](https://supabase.com)에서 프로젝트 생성
-2. SQL Editor에서 `supabase/schema.sql` 실행
-3. `.env`에 `SUPABASE_URL`, `SUPABASE_ANON_KEY` 입력
+**프로젝트 URL:** `https://yhejcjnvkaormbfkrynb.supabase.co`
+
+1. SQL Editor에서 `supabase/schema.sql` 실행 (월드컵 앱 테이블)
+2. `qc_issues` 등 추가 마이그레이션: `supabase/migrations/`
+3. `.env` / Secrets에 `SUPABASE_URL`, `SUPABASE_ANON_KEY` 입력 (키는 대시보드 → Settings → API)
 
 ## 배포
 
@@ -79,7 +94,7 @@ Production URL: https://worldcup-predictor-rosy.vercel.app
 |------|------|
 | `OPENAI_API_KEY` | GPT AI 비평 |
 | `OPENAI_MODEL` | 기본 `gpt-5-mini` |
-| `SUPABASE_URL` | Supabase 프로젝트 URL |
+| `SUPABASE_URL` | `https://yhejcjnvkaormbfkrynb.supabase.co` |
 | `SUPABASE_ANON_KEY` | Supabase anon key |
 
 ### Vercel (랜딩 빌드)

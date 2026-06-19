@@ -26,3 +26,7 @@ Thumbs.db
 .idea/
 .vscode/
 .vercel
+
+# Local extract / duplicate apps (not part of main repo)
+worldcup-extracted/
+qc-issue-tracker/

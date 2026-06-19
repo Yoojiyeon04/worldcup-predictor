@@ -8,7 +8,7 @@ Supabase `public.qc_issues` 테이블을 사용하는 QC 이슈 추적 웹앱입
 - 상단 통계 카드 (전체 / 미해결 / 고위험 / 완료율)
 - 새 이슈 등록 (`/new`)
 - 목록에서 상태 변경 (`접수` / `검토중` / `조치완료`)
-- 관리자 점검 패널 (목록 하단) + `/admin` 페이지
+- 관리자 점검 패널 (목록 하단) — `/admin`은 목록 하단 패널로 리다이렉트
   - `GET /api/admin/qc-issues/summary`
   - 요청 헤더: `x-admin-token: <ADMIN_TOKEN>`
   - 서버에서 `SUPABASE_SERVICE_ROLE_KEY`로 Supabase 접속 후 전체 집계
@@ -23,7 +23,7 @@ cp .env.example .env.local
 
 | 변수 | 공개 여부 | 설명 |
 |------|-----------|------|
-| `NEXT_PUBLIC_SUPABASE_URL` | 공개 | `https://xxxx.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_URL` | 공개 | `https://yhejcjnvkaormbfkrynb.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 공개 | `eyJhbGci...` 또는 `sb_publishable_...` |
 | `SUPABASE_SERVICE_ROLE_KEY` | **서버 전용** | `eyJhbGci...` 또는 `sb_secret_...` — **관리 API 필수** |
 | `ADMIN_TOKEN` | **서버 전용** | 관리자 점검 패널·API 인증용 임의 문자열 |
@@ -59,7 +59,7 @@ src/
 │   ├── layout.tsx
 │   ├── page.tsx                    # 목록 + 통계 카드 + 관리 패널
 │   ├── new/page.tsx
-│   ├── admin/page.tsx
+│   ├── admin/page.tsx              # → /#admin-check-panel-title 리다이렉트
 │   ├── actions/qc-issues.ts        # 등록·상태변경 Server Actions
 │   └── api/admin/qc-issues/summary/route.ts
 ├── components/
@@ -92,4 +92,5 @@ src/
 ## DB 참고
 
 - `qc_issues` RLS: 교육용 `edu_all_access` (anon 전체 CRUD 허용) — 운영 전 정책 분리 필요
+- `status` / `severity` / `category` CHECK 제약 (잘못된 값 INSERT/UPDATE 시 DB 거부)
 - `updated_at`은 DB trigger + 앱에서 상태 변경 시 갱신

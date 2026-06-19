@@ -404,6 +404,9 @@ def main() -> None:
             st.info("Supabase 미연결 (로컬 모드)")
         st.caption(f"Session: `{st.session_state.session_id[:8]}…`")
         st.caption("🔒 RLS: 본인 세션 데이터만 접근 가능")
+        st.divider()
+        st.markdown("**📋 QC 이슈 추적**")
+        st.caption("사이드바에서 **QC 이슈 추적** 페이지를 선택하세요.")
 
     _render_header()
     _render_presets()

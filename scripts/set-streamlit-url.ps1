@@ -13,7 +13,7 @@ if ($StreamlitUrl -notmatch '^https://.+\.streamlit\.app/?$') {
 
 $npx = "C:\Program Files\nodejs\npx.cmd"
 foreach ($target in @("production", "preview", "development")) {
-    $StreamlitUrl | & $npx vercel env add STREAMLIT_APP_URL $target --force 2>&1 | Out-Null
+    $null = $StreamlitUrl | & $npx vercel env add STREAMLIT_APP_URL $target --force 2>&1
     Write-Host "Updated STREAMLIT_APP_URL ($target)"
 }
 
