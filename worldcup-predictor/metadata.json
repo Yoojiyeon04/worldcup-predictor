@@ -1,0 +1,6 @@
+{
+  "name": "월드컵 승부 예측기: 데이터와 추정",
+  "description": "대한민국 vs 멕시코 경기의 변수와 가중치를 수정하고, AI 비평을 통해 스포츠 예측의 본질인 근거와 한계를 배우는 교육용 데이터 시뮬레이터입니다.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
