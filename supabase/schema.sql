@@ -50,6 +50,65 @@ $$;
 grant execute on function public.set_session_context(text) to anon, authenticated;
 grant execute on function public.health_check() to anon, authenticated;
 
+-- RPC: REST 요청마다 세션이 끊기므로 read/write는 단일 트랜잭션 함수로 처리
+create or replace function public.upsert_reflection(p_sid text, p_question_id text, p_answer text)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_sid is null or p_sid !~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
+    raise exception 'invalid session_id';
+  end if;
+  insert into reflection_answers (session_id, question_id, answer)
+  values (p_sid, p_question_id, coalesce(p_answer, ''))
+  on conflict (session_id, question_id)
+  do update set answer = excluded.answer, updated_at = now();
+  return true;
+end;
+$$;
+
+create or replace function public.get_reflections(p_sid text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  result jsonb;
+begin
+  if p_sid is null or p_sid !~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
+    raise exception 'invalid session_id';
+  end if;
+  select coalesce(jsonb_object_agg(question_id, answer), '{}'::jsonb)
+  into result
+  from reflection_answers
+  where session_id = p_sid;
+  return coalesce(result, '{}'::jsonb);
+end;
+$$;
+
+create or replace function public.insert_prediction_snapshot(p_sid text, p_variables jsonb, p_result jsonb)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_sid is null or p_sid !~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
+    raise exception 'invalid session_id';
+  end if;
+  insert into prediction_snapshots (session_id, variables, result)
+  values (p_sid, p_variables, p_result);
+  return true;
+end;
+$$;
+
+grant execute on function public.upsert_reflection(text, text, text) to anon, authenticated;
+grant execute on function public.get_reflections(text) to anon, authenticated;
+grant execute on function public.insert_prediction_snapshot(text, jsonb, jsonb) to anon, authenticated;
+
 -- 기존 permissive 정책 제거 (재실행 안전)
 drop policy if exists "reflection_anon_all" on reflection_answers;
 drop policy if exists "prediction_anon_insert" on prediction_snapshots;

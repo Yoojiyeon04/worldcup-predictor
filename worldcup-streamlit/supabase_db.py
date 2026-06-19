@@ -39,10 +39,6 @@ def get_client():
         return None
 
 
-def _set_session(client, session_id: str) -> None:
-    client.rpc("set_session_context", {"sid": session_id}).execute()
-
-
 def check_connection() -> dict[str, Any]:
     client = get_client()
     if not client:
@@ -59,14 +55,9 @@ def save_reflection(session_id: str, question_id: str, answer: str) -> bool:
     if not client or not answer.strip():
         return False
     try:
-        _set_session(client, session_id)
-        client.table("reflection_answers").upsert(
-            {
-                "session_id": session_id,
-                "question_id": question_id,
-                "answer": answer,
-            },
-            on_conflict="session_id,question_id",
+        client.rpc(
+            "upsert_reflection",
+            {"p_sid": session_id, "p_question_id": question_id, "p_answer": answer},
         ).execute()
         return True
     except Exception:
@@ -78,16 +69,11 @@ def load_reflections(session_id: str) -> dict[str, str]:
     if not client:
         return {}
     try:
-        _set_session(client, session_id)
-        rows = (
-            client.table("reflection_answers")
-            .select("question_id, answer")
-            .eq("session_id", session_id)
-            .execute()
-            .data
-            or []
-        )
-        return {r["question_id"]: r["answer"] for r in rows}
+        res = client.rpc("get_reflections", {"p_sid": session_id}).execute()
+        data = res.data
+        if isinstance(data, dict):
+            return {str(k): str(v) for k, v in data.items()}
+        return {}
     except Exception:
         return {}
 
@@ -97,13 +83,9 @@ def save_prediction_snapshot(session_id: str, variables: dict, result: dict) -> 
     if not client:
         return False
     try:
-        _set_session(client, session_id)
-        client.table("prediction_snapshots").insert(
-            {
-                "session_id": session_id,
-                "variables": variables,
-                "result": result,
-            }
+        client.rpc(
+            "insert_prediction_snapshot",
+            {"p_sid": session_id, "p_variables": variables, "p_result": result},
         ).execute()
         return True
     except Exception:
