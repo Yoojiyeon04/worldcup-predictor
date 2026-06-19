@@ -9,8 +9,10 @@
    - anon public key → `SUPABASE_ANON_KEY`
 
 ### RLS 보안
-- 다른 사용자의 성찰/스냅샷은 **읽을 수 없음** (본인 `session_id`만)
-- 앱이 `set_session_context` RPC를 호출한 뒤에만 read/write 가능
+
+- `public` 테이블은 RLS 활성 + `app.session_id` 기반 정책
+- read/write RPC는 `SECURITY INVOKER`로 RLS를 우회하지 않음
+- 세션 UUID를 아는 경우에만 해당 세션 데이터 접근 가능 (교육용 anon 앱)
 
 ---
 
@@ -18,9 +20,9 @@
 
 ```powershell
 cd c:\ict\test
-& "C:\Program Files\Git\cmd\git.exe" add .
-& "C:\Program Files\Git\cmd\git.exe" commit -m "Deploy: Supabase RLS + Streamlit Cloud"
-& "C:\Program Files\Git\cmd\git.exe" push origin main
+git add .
+git commit -m "your message"
+git push origin main
 ```
 
 저장소: https://github.com/Yoojiyeon04/worldcup-predictor
@@ -40,27 +42,48 @@ cd c:\ict\test
 | Main file path | `worldcup-streamlit/app.py` |
 
 4. **Advanced settings → Python** → `3.11`
-5. **Secrets** → `worldcup-streamlit/.streamlit/secrets.toml.example` 참고해 입력
-6. **Deploy!**
+5. **Secrets** → `worldcup-streamlit/.streamlit/secrets.toml.example` 참고:
 
-배포 URL 예: `https://worldcup-predictor-xxxxx.streamlit.app`
+```
+OPENAI_API_KEY = "..."
+OPENAI_MODEL = "gpt-5-mini"
+SUPABASE_URL = "https://xxx.supabase.co"
+SUPABASE_ANON_KEY = "..."
+```
+
+6. **Deploy!** → URL 복사 (예: `https://worldcup-predictor-xxxxx.streamlit.app`)
 
 ---
 
-## 4. Vercel (랜딩 페이지, 선택)
+## 4. Vercel (랜딩 페이지)
 
 1. [vercel.com/new](https://vercel.com/new) → GitHub `worldcup-predictor` Import
-2. Framework: **Other** (vercel.json 사용)
-3. Deploy
+2. GitHub Login Connection이 없으면 [Account Settings](https://vercel.com/account)에서 먼저 연결
+3. Import 설정:
 
-`web/index.html`의 `STREAMLIT_APP_URL`에 Streamlit Cloud URL 입력 후 재배포.
+| 항목 | 값 |
+|------|-----|
+| Framework | **Other** |
+| Build Command | `node scripts/build-landing.mjs` |
+| Output Directory | `dist` |
+| Install Command | *(비움)* |
+
+4. **Environment Variables**:
+
+| 변수 | 값 |
+|------|-----|
+| `STREAMLIT_APP_URL` | Streamlit Cloud 배포 URL |
+
+5. Deploy → https://worldcup-predictor-rosy.vercel.app
+
+`main` push 시 GitHub 연동이 되어 있으면 자동 재배포됩니다.
 
 ---
 
-## 5. Cursor MCP (Supabase)
+## 5. Cursor MCP
 
-1. Cursor → Settings → MCP → Supabase 인증
-2. 프로젝트 루트 `.mcp.json` 확인
-3. AI에게 "Supabase 테이블 상태 확인해줘" 요청 가능
+1. Cursor → Settings → MCP → Supabase / Vercel OAuth 인증
+2. 프로젝트 루트 `.cursor/mcp.json` 확인
+3. AI에게 "Supabase 테이블 상태 확인해줘" / "Vercel 배포 상태 확인해줘" 요청 가능
 
 **MCP/AI에 공유 금지:** `service_role` 키, `.env` 파일

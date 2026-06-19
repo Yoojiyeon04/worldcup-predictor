@@ -9,12 +9,14 @@
     ↓ git push
 GitHub (Yoojiyeon04/worldcup-predictor)
     ↓ 자동 배포
-├── Vercel        → web/ 랜딩 페이지
+├── Vercel        → web/ 랜딩 (빌드 → dist/)
 ├── Streamlit Cloud → worldcup-streamlit/app.py (메인 앱)
 └── Supabase      → 성찰 답변 · 예측 스냅샷 저장
     ↑
-Cursor MCP (Supabase) → AI가 DB/설정 상태 확인
+Cursor MCP (Supabase / Vercel) → AI가 DB·배포 상태 확인
 ```
+
+> `worldcup-predictor/`는 별도 React 프로토타입이며 Vercel 배포 대상이 아닙니다.
 
 ## 로컬 실행
 
@@ -33,25 +35,32 @@ py -m streamlit run app.py
 
 ## 배포
 
-### GitHub → Streamlit Cloud (앱)
+### GitHub → Streamlit Cloud (메인 앱)
 
 1. [share.streamlit.io](https://share.streamlit.io) → GitHub 연동
 2. Repository: `Yoojiyeon04/worldcup-predictor`
 3. Main file: `worldcup-streamlit/app.py`
-4. Secrets에 `OPENAI_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY` 추가
+4. **Secrets**에 아래 변수 등록 (`worldcup-streamlit/.streamlit/secrets.toml.example` 참고)
 
 ### GitHub → Vercel (랜딩)
 
 1. [vercel.com](https://vercel.com) → Import `worldcup-predictor`
-2. Root Directory: `.` (vercel.json → web/)
-3. push 시 자동 배포
+2. Root Directory: `.`
+3. Framework: **Other**
+4. Build Command: `node scripts/build-landing.mjs`
+5. Output Directory: `dist`
+6. Environment: `STREAMLIT_APP_URL` (Streamlit Cloud URL)
+7. `main` push 시 자동 재배포 (GitHub 연동 필요)
+
+Production URL: https://worldcup-predictor-rosy.vercel.app
 
 ### Cursor MCP
 
-프로젝트 루트 `.mcp.json`에 Supabase MCP가 설정되어 있습니다.  
-Cursor에서 Supabase MCP 인증 후 AI가 테이블·프로젝트 상태를 조회할 수 있습니다.
+프로젝트 루트 `.cursor/mcp.json`에 Supabase·Vercel MCP가 설정되어 있습니다.
 
 ## 환경 변수
+
+### Streamlit Cloud (필수)
 
 | 변수 | 용도 |
 |------|------|
@@ -59,3 +68,11 @@ Cursor에서 Supabase MCP 인증 후 AI가 테이블·프로젝트 상태를 조
 | `OPENAI_MODEL` | 기본 `gpt-5-mini` |
 | `SUPABASE_URL` | Supabase 프로젝트 URL |
 | `SUPABASE_ANON_KEY` | Supabase anon key |
+
+### Vercel (랜딩 빌드)
+
+| 변수 | 용도 |
+|------|------|
+| `STREAMLIT_APP_URL` | 랜딩 페이지 → Streamlit 앱 링크 |
+
+OpenAI/Supabase 키는 **Streamlit Cloud Secrets**에만 등록하면 됩니다. Vercel 랜딩에서는 사용하지 않습니다.

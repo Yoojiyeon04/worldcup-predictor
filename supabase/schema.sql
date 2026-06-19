@@ -41,7 +41,7 @@ $$;
 create or replace function public.health_check()
 returns boolean
 language sql
-security definer
+security invoker
 set search_path = public
 as $$
   select true;
@@ -54,13 +54,14 @@ grant execute on function public.health_check() to anon, authenticated;
 create or replace function public.upsert_reflection(p_sid text, p_question_id text, p_answer text)
 returns boolean
 language plpgsql
-security definer
+security invoker
 set search_path = public
 as $$
 begin
   if p_sid is null or p_sid !~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
     raise exception 'invalid session_id';
   end if;
+  perform set_config('app.session_id', p_sid, true);
   insert into reflection_answers (session_id, question_id, answer)
   values (p_sid, p_question_id, coalesce(p_answer, ''))
   on conflict (session_id, question_id)
@@ -72,7 +73,7 @@ $$;
 create or replace function public.get_reflections(p_sid text)
 returns jsonb
 language plpgsql
-security definer
+security invoker
 set search_path = public
 as $$
 declare
@@ -81,6 +82,7 @@ begin
   if p_sid is null or p_sid !~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
     raise exception 'invalid session_id';
   end if;
+  perform set_config('app.session_id', p_sid, true);
   select coalesce(jsonb_object_agg(question_id, answer), '{}'::jsonb)
   into result
   from reflection_answers
@@ -92,13 +94,14 @@ $$;
 create or replace function public.insert_prediction_snapshot(p_sid text, p_variables jsonb, p_result jsonb)
 returns boolean
 language plpgsql
-security definer
+security invoker
 set search_path = public
 as $$
 begin
   if p_sid is null or p_sid !~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
     raise exception 'invalid session_id';
   end if;
+  perform set_config('app.session_id', p_sid, true);
   insert into prediction_snapshots (session_id, variables, result)
   values (p_sid, p_variables, p_result);
   return true;
